@@ -3,7 +3,6 @@ package com.mika.newcalculator.ui.calculator
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,11 +15,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.mika.newcalculator.ui.theme.NewCalculatorTheme
 
 @Composable
 fun CalculatorScreen() {
     val context = LocalContext.current
+    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+
     // Create ViewModel using the Factory pattern to inject dependencies
     val viewModel: CalculatorViewModel = viewModel(
         factory = CalculatorViewModel.provideFactory(context)
@@ -208,7 +208,6 @@ fun CalculatorScreen() {
         buttons.forEach { row ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 row.forEach { label ->
                     // Logic to determine button colors
@@ -218,7 +217,13 @@ fun CalculatorScreen() {
                         else -> MaterialTheme.colorScheme.primary // Number keys
                     }
 
-                    CalculatorButton(label, containerColor = buttonColor) {
+                    CalculatorButton(
+                        label = label,
+                        containerColor = buttonColor,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+
                         viewModel.onButtonClick(label)
                     }
                 }
@@ -241,7 +246,7 @@ fun CalculatorButton(label: String, containerColor: Color, modifier: Modifier = 
             containerColor = containerColor,
             contentColor = Color.White
         ),
-        contentPadding = PaddingValues(0.dp) // 中の余白を消して文字を大きく見せる
+        contentPadding = PaddingValues(0.dp)
     ) {
         Text(
             text = label,
