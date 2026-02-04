@@ -1,6 +1,8 @@
 package com.mika.newcalculator.domain
 
 import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.util.Locale
 
 /**
  * Handles the core mathematical logic for the calculator.
@@ -13,21 +15,15 @@ class CalculatorLogic {
      */
     fun calculate(expression: String): String {
         return try {
-            // Convert display symbols to evaluation symbols
-            val evalExpr = expression.replace("÷", "/")
+            val cleanExpr = expression.replace(",", "")
+                .replace("÷", "/")
                 .replace("×", "*")
+                .replace("\\s".toRegex(), "")
 
-            // Remove any whitespace
-            val cleanExpr = evalExpr.replace("\\s".toRegex(), "")
-
-            // Evaluate the expression
             val result = evaluateExpression(cleanExpr)
-
-            // Format the result
             formatResult(result)
 
         } catch (e: Exception) {
-            // Return "Error" to be displayed on the UI
             "Error"
         }
     }
@@ -40,7 +36,8 @@ class CalculatorLogic {
         if (result.isNaN() || result.isInfinite()) return "Error"
 
         // Format: #,###.######## (comma separator, max 8 decimal places)
-        val df = DecimalFormat("#,###.########")
+        val symbols = DecimalFormatSymbols(Locale.US)
+        val df = DecimalFormat("#,###.########", symbols)
         return df.format(result)
     }
 

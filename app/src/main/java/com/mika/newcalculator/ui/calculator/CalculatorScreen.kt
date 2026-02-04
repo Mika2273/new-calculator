@@ -135,14 +135,13 @@ fun CalculatorScreen() {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 4.dp)
                     .background(
                         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f),
                         shape = MaterialTheme.shapes.medium
                     )
                     .padding(16.dp)
             ) {
-                val inputValue = displayValue.toDoubleOrNull() ?: 0.0
+                val inputValue = displayValue.replace(",", "").toDoubleOrNull() ?: 0.0
                 val convertedValue = when (currencyConversionMode) {
                     1 -> (inputValue * conversionRate).toInt() // EUR to JPY
                     2 -> inputValue / conversionRate // JPY to EUR
@@ -155,7 +154,10 @@ fun CalculatorScreen() {
                 }
                 val formattedValue = when (currencyConversionMode) {
                     1 -> "$symbol$convertedValue" // JPY is integer
-                    2 -> "$symbol${"%.2f".format(convertedValue)}" // EUR has 2 decimal places
+                    2 -> {
+                        val formattedNum = String.format(java.util.Locale.US, "%.2f", convertedValue)
+                        "$symbol$formattedNum"
+                    }
                     else -> ""
                 }
                 Text(
@@ -174,7 +176,6 @@ fun CalculatorScreen() {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 4.dp)
                 .background(
                     color = MaterialTheme.colorScheme.surfaceVariant,
                     shape = MaterialTheme.shapes.medium
@@ -228,16 +229,19 @@ fun CalculatorScreen() {
 }
 
 @Composable
-fun CalculatorButton(label: String, containerColor: Color, onClick: () -> Unit) {
+fun CalculatorButton(label: String, containerColor: Color, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Button(
         onClick = onClick,
-        modifier = Modifier
-            .size(72.dp)
-            .background(MaterialTheme.colorScheme.secondaryContainer, CircleShape),
+        modifier = modifier
+            .padding(2.dp)
+            .size(80.dp)
+            .height(80.dp),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = containerColor,
             contentColor = Color.White
-        )
+        ),
+        contentPadding = PaddingValues(0.dp) // 中の余白を消して文字を大きく見せる
     ) {
         Text(
             text = label,
@@ -245,11 +249,12 @@ fun CalculatorButton(label: String, containerColor: Color, onClick: () -> Unit) 
             fontSize = when (label) {
                 "⌫" -> 28.sp  // Adjust size for the backspace symbol
                 else -> when (label.length) {
-                    1 -> 26.sp
-                    2 -> 20.sp
-                    else -> 18.sp
+                    1 -> 32.sp
+                    2 -> 24.sp
+                    else -> 20.sp
                 }
             },
+            fontWeight = FontWeight.Bold,
             maxLines = 1,
             overflow = TextOverflow.Clip,
             modifier = when (label) {
